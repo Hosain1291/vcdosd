@@ -2,16 +2,14 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retro Video Lab - VCR & VHS Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retro Video Lab - Real VHS Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- GIF generation library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
         
-        /* Requested Font: ThinDungGeunMo */
         @font-face {
             font-family: 'ThinRounded';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2511-1@1.0/ThinDungGeunMo.woff2') format('woff2');
@@ -23,38 +21,36 @@
             font-family: 'ThinRounded', 'VT323', 'Noto Sans KR', monospace;
             background-color: #050505;
             color: #d4d4d4;
+            overscroll-behavior: none;
         }
 
-        /* Custom Slider Styling */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
             background: transparent;
+            height: 24px;
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 16px;
-            width: 16px;
-            background: #ec4899; /* Pink for VHS theme */
-            margin-top: -6px;
+            height: 20px;
+            width: 20px;
+            background: #ec4899; 
+            margin-top: -8px;
             cursor: pointer;
             border: 2px solid #000;
+            border-radius: 50%;
         }
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
             height: 4px;
             cursor: pointer;
             background: #333;
+            border-radius: 2px;
         }
         input[type=range]:focus {
             outline: none;
         }
 
-        input[type=text] {
-            font-family: 'ThinRounded', 'VT323', 'Noto Sans KR', monospace;
-        }
-
-        /* VCR Button Styling */
         .vcr-btn {
             background: linear-gradient(to bottom, #333, #111);
             border: 1px solid #444;
@@ -72,212 +68,188 @@
             box-shadow: inset 0 0 10px #00ff00;
         }
 
-        /* CRT Screen Effect Overlay for the UI */
         .crt-overlay::before {
             content: " ";
             display: block;
             position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
             z-index: 2;
             background-size: 100% 2px, 3px 100%;
             pointer-events: none;
         }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden text-lg selection:bg-pink-900 selection:text-white">
+<body class="h-[100dvh] flex flex-col overflow-hidden text-base sm:text-lg selection:bg-pink-900 selection:text-white">
 
-    <!-- Header -->
-    <header class="bg-zinc-900 border-b border-zinc-800 p-4 flex justify-between items-center shrink-0 z-10">
+    <header class="bg-zinc-900 border-b border-zinc-800 p-3 sm:p-4 flex justify-between items-center shrink-0 z-10 h-14 sm:h-16">
         <div class="flex items-center gap-2">
-            <div class="w-4 h-4 bg-blue-600 rounded-sm animate-pulse border border-blue-400"></div>
-            <h1 class="text-2xl text-pink-500 tracking-wider font-bold">RETRO VISION LAB v3.1 (VCR)</h1>
+            <div class="w-3 h-3 sm:w-4 sm:h-4 bg-green-600 rounded-sm animate-pulse border border-green-400"></div>
+            <h1 class="text-xl sm:text-2xl text-pink-500 tracking-wider font-bold truncate">REAL VHS LAB v4.0</h1>
         </div>
-        <div class="text-zinc-500 text-sm hidden sm:block">VHS / NTSC / VCR EMULATOR</div>
+        <div class="text-zinc-500 text-xs sm:text-sm hidden sm:block">TRUE NTSC SIMULATION</div>
+        <div class="sm:hidden text-zinc-600 text-xs border border-zinc-700 px-1 rounded">PRO</div>
     </header>
 
-    <!-- Main Content -->
     <div class="flex-1 flex flex-col lg:flex-row h-full overflow-hidden relative">
         
-        <!-- Left: Canvas Area -->
-        <div class="flex-1 bg-black relative flex items-center justify-center p-4 overflow-hidden crt-overlay group">
-            
-            <div id="upload-placeholder" class="text-center z-10 pointer-events-none transition-opacity duration-300">
-                <div class="w-full h-full absolute inset-0 bg-blue-800 flex items-center justify-center flex-col">
-                    <p class="text-white text-4xl mb-2 font-bold animate-pulse">VIDEO CASSETTE RECORDER</p>
-                    <p class="text-blue-200 text-xl">INSERT TAPE OR START CAMERA</p>
+        <div class="flex-1 bg-black relative flex items-center justify-center p-2 sm:p-4 overflow-hidden crt-overlay group min-h-[40%]">
+            <div id="upload-placeholder" class="text-center z-10 pointer-events-none transition-opacity duration-300 w-full px-4">
+                <div class="w-full aspect-video max-w-lg mx-auto bg-blue-800 flex items-center justify-center flex-col border-4 border-zinc-800 shadow-xl p-4">
+                    <p class="text-white text-2xl sm:text-4xl mb-2 font-bold animate-pulse">VCR SYSTEM</p>
+                    <p class="text-blue-200 text-sm sm:text-xl">INSERT TAPE / CAM</p>
                 </div>
             </div>
 
-            <!-- The actual video element (hidden, used as source) -->
             <video id="source-video" loop muted playsinline crossorigin="anonymous" class="hidden"></video>
+            <canvas id="gl-canvas" class="max-w-full max-h-full shadow-2xl border-2 sm:border-4 border-zinc-800 hidden bg-blue-800"></canvas>
             
-            <!-- The WebGL Canvas -->
-            <canvas id="gl-canvas" class="max-w-full max-h-full shadow-2xl border-4 border-zinc-800 hidden bg-blue-800"></canvas>
-            
-            <!-- Recording Indicators -->
-            <div id="recording-indicator-gif" class="hidden absolute top-8 right-8 flex items-center gap-2 bg-blue-900/80 text-white px-3 py-1 rounded border border-blue-500 z-20">
-                <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-                <span>GIF REC</span>
+            <div id="recording-indicator-gif" class="hidden absolute top-4 right-4 sm:top-8 sm:right-8 flex items-center gap-2 bg-blue-900/80 text-white px-2 py-1 sm:px-3 sm:py-1 rounded border border-blue-500 z-20 text-xs sm:text-base">
+                <div class="w-2 h-2 sm:w-3 sm:h-3 bg-blue-400 rounded-full animate-pulse"></div>
+                <span>GIF</span>
             </div>
-            <div id="recording-indicator-video" class="hidden absolute top-8 right-8 flex items-center gap-2 bg-red-900/80 text-white px-3 py-1 rounded border border-red-500 z-20">
-                <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                <span>VIDEO REC</span>
+            <div id="recording-indicator-video" class="hidden absolute top-4 right-4 sm:top-8 sm:right-8 flex items-center gap-2 bg-red-900/80 text-white px-2 py-1 sm:px-3 sm:py-1 rounded border border-red-500 z-20 text-xs sm:text-base">
+                <div class="w-2 h-2 sm:w-3 sm:h-3 bg-red-500 rounded-full animate-pulse"></div>
+                <span>REC</span>
             </div>
         </div>
 
-        <!-- Right: Controls -->
-        <div class="w-full lg:w-96 bg-zinc-950 border-l border-zinc-800 flex flex-col shrink-0 h-[50vh] lg:h-auto z-10 shadow-xl">
+        <div class="w-full lg:w-96 bg-zinc-950 border-t lg:border-t-0 lg:border-l border-zinc-800 flex flex-col shrink-0 h-[50dvh] lg:h-auto z-10 shadow-[0_-5px_15px_rgba(0,0,0,0.5)]">
             
-            <!-- Source Input -->
-            <div class="p-4 border-b border-zinc-800 bg-zinc-900/50 flex flex-col gap-2">
+            <div class="p-3 sm:p-4 border-b border-zinc-800 bg-zinc-900/50 flex flex-col gap-2 shrink-0">
                 <div class="flex justify-between items-center">
-                    <div class="text-pink-400 text-sm mb-1">>> SOURCE INPUT</div>
-                    <label class="flex items-center gap-2 text-xs cursor-pointer">
-                        <input type="checkbox" id="toggle-vcr-osd" checked class="accent-green-500">
-                        <span class="text-green-400">VCR OSD 켜기</span>
+                    <div class="text-pink-400 text-xs sm:text-sm mb-1">>> SOURCE INPUT</div>
+                    <label class="flex items-center gap-2 text-xs cursor-pointer active:opacity-70">
+                        <input type="checkbox" id="toggle-vcr-osd" checked class="accent-green-500 w-4 h-4">
+                        <span class="text-green-400">OSD 켜기</span>
                     </label>
                 </div>
                 <div class="flex gap-2">
-                    <label class="flex-1 cursor-pointer group">
+                    <label class="flex-1 cursor-pointer group active:scale-95 transition-transform">
                         <input type="file" id="video-input" accept="video/*" class="hidden">
-                        <div class="vcr-btn text-center text-zinc-400 hover:text-white p-2 text-sm h-full flex items-center justify-center rounded">
-                            📼 EJECT / LOAD
+                        <div class="vcr-btn text-center text-zinc-400 hover:text-white p-2 sm:p-3 text-xs sm:text-sm h-full flex items-center justify-center rounded font-bold">
+                            📼 LOAD FILE
                         </div>
                     </label>
-                    <button id="btn-camera" class="flex-1 vcr-btn text-center text-zinc-400 hover:text-white p-2 text-sm rounded">
+                    <button id="btn-camera" class="flex-1 vcr-btn text-center text-zinc-400 hover:text-white p-2 sm:p-3 text-xs sm:text-sm rounded font-bold active:scale-95 transition-transform">
                         ◉ CAMERA
                     </button>
                 </div>
             </div>
 
-            <!-- VCR Transport Controls -->
-            <div class="p-4 border-b border-zinc-800 bg-black grid grid-cols-4 gap-2">
-                <button id="btn-rew" class="vcr-btn p-2 text-xs flex flex-col items-center justify-center gap-1 rounded text-zinc-400 hover:text-white">
-                    <span>⏪</span><span>REW</span>
+            <div class="p-2 sm:p-4 border-b border-zinc-800 bg-black grid grid-cols-4 gap-1 sm:gap-2 shrink-0">
+                <button id="btn-rew" class="vcr-btn p-3 sm:p-4 text-xs flex flex-col items-center justify-center gap-1 rounded text-zinc-400 hover:text-white touch-manipulation">
+                    <span class="text-lg">⏪</span>
                 </button>
-                <button id="btn-play" class="vcr-btn p-2 text-xs flex flex-col items-center justify-center gap-1 rounded text-zinc-400 hover:text-white active">
-                    <span>▶</span><span>PLAY</span>
+                <button id="btn-play" class="vcr-btn p-3 sm:p-4 text-xs flex flex-col items-center justify-center gap-1 rounded text-zinc-400 hover:text-white active touch-manipulation">
+                    <span class="text-lg">▶</span>
                 </button>
-                <button id="btn-pause" class="vcr-btn p-2 text-xs flex flex-col items-center justify-center gap-1 rounded text-zinc-400 hover:text-white">
-                    <span>⏸</span><span>PAUSE</span>
+                <button id="btn-pause" class="vcr-btn p-3 sm:p-4 text-xs flex flex-col items-center justify-center gap-1 rounded text-zinc-400 hover:text-white touch-manipulation">
+                    <span class="text-lg">⏸</span>
                 </button>
-                <button id="btn-ff" class="vcr-btn p-2 text-xs flex flex-col items-center justify-center gap-1 rounded text-zinc-400 hover:text-white">
-                    <span>⏩</span><span>FF</span>
+                <button id="btn-ff" class="vcr-btn p-3 sm:p-4 text-xs flex flex-col items-center justify-center gap-1 rounded text-zinc-400 hover:text-white touch-manipulation">
+                    <span class="text-lg">⏩</span>
                 </button>
             </div>
 
-            <!-- Controls Scroll Area -->
-            <div class="flex-1 overflow-y-auto no-scrollbar p-6 relative">
+            <div class="flex-1 overflow-y-auto no-scrollbar p-4 sm:p-6 relative">
                 
-                <!-- Text Overlay Panel -->
-                <div class="mb-8 pb-8 border-b border-zinc-800">
+                <div class="mb-6 pb-6 border-b border-zinc-800">
                     <div class="flex items-center justify-between text-green-500 border-b border-green-900/30 pb-2 mb-4">
-                        <span class="text-sm">CUSTOM TEXT</span>
-                        <span class="text-xs bg-green-900/20 px-2 py-0.5 rounded">TITLER</span>
+                        <span class="text-sm">TITLER (자막)</span>
+                        <span class="text-xs bg-green-900/20 px-2 py-0.5 rounded">EDIT</span>
                     </div>
                     <div class="space-y-4">
                         <div>
-                            <input type="text" id="text-input" placeholder="커스텀 텍스트 입력..." class="w-full bg-zinc-900 border border-zinc-700 p-2 text-white focus:border-green-500 focus:outline-none placeholder-zinc-600 font-mono text-sm" value="">
+                            <input type="text" id="text-input" placeholder="커스텀 텍스트..." class="w-full bg-zinc-900 border border-zinc-700 p-2 text-white focus:border-green-500 focus:outline-none placeholder-zinc-600 font-mono text-sm rounded">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-xs text-zinc-500 block mb-1">위치 X</label>
+                                <label class="text-xs text-zinc-500 block mb-1">X 좌표</label>
                                 <input type="range" id="text-x" min="0" max="100" value="50" class="accent-green-500">
                             </div>
                             <div>
-                                <label class="text-xs text-zinc-500 block mb-1">위치 Y</label>
+                                <label class="text-xs text-zinc-500 block mb-1">Y 좌표</label>
                                 <input type="range" id="text-y" min="0" max="100" value="50" class="accent-green-500">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- VHS Panel -->
-                <div class="space-y-6">
+                <div class="space-y-6 pb-20">
                     <div class="flex items-center justify-between text-pink-500 border-b border-pink-900/30 pb-2 mb-4">
-                        <span class="text-sm">VIDEO TRACKING</span>
-                        <span class="text-xs bg-pink-900/20 px-2 py-0.5 rounded">ADJUST</span>
+                        <span class="text-sm">PRO TRACKING (화질 조정)</span>
+                        <span class="text-xs bg-pink-900/20 px-2 py-0.5 rounded">V4.0 ENGINE</span>
                     </div>
 
-                    <div class="space-y-5">
+                    <div class="space-y-6">
                         <div class="group">
                             <div class="flex justify-between mb-1 text-sm text-zinc-400 group-hover:text-pink-400 transition-colors">
-                                <label>노이즈 & 눈꽃 (Snow)</label>
-                                <span id="val-noise">0.25</span>
+                                <label>색 번짐 (Chroma Blur)</label>
+                                <span id="val-rgbShift">4.5</span>
                             </div>
-                            <input type="range" id="param-noise" min="0" max="1" step="0.01" value="0.25">
+                            <input type="range" id="param-rgbShift" min="0" max="10" step="0.1" value="4.5">
+                        </div>
+                         <div class="group">
+                            <div class="flex justify-between mb-1 text-sm text-zinc-400 group-hover:text-pink-400 transition-colors">
+                                <label>테두리 잔상 (Sharpen)</label>
+                                <span id="val-sharpen">0.5</span>
+                            </div>
+                            <input type="range" id="param-sharpen" min="0" max="2" step="0.01" value="0.5">
                         </div>
                         <div class="group">
                             <div class="flex justify-between mb-1 text-sm text-zinc-400 group-hover:text-pink-400 transition-colors">
-                                <label>헤드 스위칭 & 찢김 (Head)</label>
-                                <span id="val-distortion">0.3</span>
+                                <label>노이즈 (Snow)</label>
+                                <span id="val-noise">0.3</span>
                             </div>
-                            <input type="range" id="param-distortion" min="0" max="1" step="0.01" value="0.30">
+                            <input type="range" id="param-noise" min="0" max="1" step="0.01" value="0.3">
                         </div>
                         <div class="group">
                             <div class="flex justify-between mb-1 text-sm text-zinc-400 group-hover:text-pink-400 transition-colors">
-                                <label>색 번짐 (Chroma Bleed)</label>
-                                <span id="val-rgbShift">3.5</span>
+                                <label>헤드 찢김 (Head)</label>
+                                <span id="val-distortion">0.2</span>
                             </div>
-                            <input type="range" id="param-rgbShift" min="0" max="10" step="0.1" value="3.5">
+                            <input type="range" id="param-distortion" min="0" max="1" step="0.01" value="0.2">
                         </div>
-                        
-                        <div class="pt-4 border-t border-zinc-800 space-y-5">
-                             <div class="group">
-                                <div class="flex justify-between mb-1 text-sm text-zinc-400 group-hover:text-pink-400 transition-colors">
-                                    <label>테이프 늘어짐 (Wobble)</label>
-                                    <span id="val-wobble">0.1</span>
-                                </div>
-                                <input type="range" id="param-wobble" min="0" max="1" step="0.01" value="0.1">
+                        <div class="group">
+                            <div class="flex justify-between mb-1 text-sm text-zinc-400 group-hover:text-pink-400 transition-colors">
+                                <label>화면 울렁임 (Wobble)</label>
+                                <span id="val-wobble">0.05</span>
                             </div>
-                            <div class="group">
-                                <div class="flex justify-between mb-1 text-sm text-zinc-400 group-hover:text-pink-400 transition-colors">
-                                    <label>전원 노이즈 (Hum)</label>
-                                    <span id="val-hum">0.2</span>
-                                </div>
-                                <input type="range" id="param-hum" min="0" max="1" step="0.01" value="0.2">
-                            </div>
+                            <input type="range" id="param-wobble" min="0" max="1" step="0.01" value="0.05">
                         </div>
-
-                        <div class="pt-4 border-t border-zinc-800">
-                             <div class="group">
-                                <div class="flex justify-between mb-1 text-sm text-zinc-400 group-hover:text-pink-400 transition-colors">
-                                    <label>스캔라인 (Scanlines)</label>
-                                    <span id="val-scanline">0.4</span>
-                                </div>
-                                <input type="range" id="param-scanline" min="0" max="1" step="0.01" value="0.40">
+                        <div class="group">
+                            <div class="flex justify-between mb-1 text-sm text-zinc-400 group-hover:text-pink-400 transition-colors">
+                                <label>전원 노이즈 (Hum)</label>
+                                <span id="val-hum">0.15</span>
                             </div>
+                            <input type="range" id="param-hum" min="0" max="1" step="0.01" value="0.15">
                         </div>
-
                     </div>
                 </div>
             </div>
 
-            <!-- Export Section -->
-            <div class="p-4 border-t border-zinc-800 bg-zinc-900 space-y-3">
+            <div class="p-3 sm:p-4 border-t border-zinc-800 bg-zinc-900 space-y-3 shrink-0 pb-safe">
                 <div class="grid grid-cols-2 gap-2">
-                    <button id="btn-record-gif" class="vcr-btn text-blue-400 py-3 text-sm font-bold tracking-wider rounded disabled:opacity-50">
-                        GIF RECORD
+                    <button id="btn-record-gif" class="vcr-btn text-blue-400 py-3 sm:py-4 text-xs sm:text-sm font-bold tracking-wider rounded disabled:opacity-50 active:scale-95 transition-transform touch-manipulation">
+                        GIF 저장
                     </button>
-                    <button id="btn-record-video" class="vcr-btn text-red-500 py-3 text-sm font-bold tracking-wider rounded disabled:opacity-50 flex justify-center items-center gap-2">
-                        <span id="video-btn-text">● TAPE REC</span>
+                    <button id="btn-record-video" class="vcr-btn text-red-500 py-3 sm:py-4 text-xs sm:text-sm font-bold tracking-wider rounded disabled:opacity-50 flex justify-center items-center gap-2 active:scale-95 transition-transform touch-manipulation">
+                        <span id="video-btn-text">● 영상 저장</span>
                     </button>
                 </div>
-                <div id="status-msg" class="text-center text-xs text-zinc-500 h-4 font-mono"></div>
+                <div id="status-msg" class="text-center text-xs text-zinc-500 h-4 font-mono truncate"></div>
             </div>
         </div>
     </div>
 
-    <!-- Hidden Download Link -->
     <a id="download-link" class="hidden"></a>
 
     <script>
         /**
-         * Enhanced WebGL Shader Code for Realistic VHS/NTSC + VCR OSD
+         * REAL VHS/NTSC SHADER V4.0
+         * Features: Chroma Subsampling, Edge Ringing (Peaking), YIQ Color Space, Interlacing Artifacts
          */
         const vsSource = `
             attribute vec2 a_position;
@@ -294,23 +266,27 @@
             uniform sampler2D u_image;
             uniform sampler2D u_text;
             uniform float u_time;
-            uniform int u_blueScreen; // 1 if blue screen active
+            uniform int u_blueScreen; 
+            uniform vec2 u_resolution; // Added resolution for precise pixel ops
+
             varying vec2 v_texCoord;
 
             // Params
             uniform float u_noise;      
             uniform float u_scanline;   
-            uniform float u_rgbShift;   
+            uniform float u_rgbShift;   // Chroma Blur Amount
             uniform float u_distortion; 
             uniform float u_wobble;     
             uniform float u_hum;        
             uniform float u_vignette;
             uniform float u_brightness;
+            uniform float u_sharpen;    // New param: Edge Ringing
 
             float rand(vec2 co){
                 return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
             }
 
+            // NTSC Standard YIQ Transform
             vec3 rgb2yiq(vec3 c){
                 return vec3(
                     0.299 * c.r + 0.587 * c.g + 0.114 * c.b,
@@ -330,114 +306,133 @@
             void main() {
                 vec2 uv = v_texCoord;
                 
-                // 1. Distortion & Wobble
+                // --- 1. GEOMETRY & TIMING ---
+                
+                // Tape Wobble (Low freq wave)
                 if (u_wobble > 0.0) {
-                    uv.x += sin(uv.y * 10.0 + u_time) * 0.005 * u_wobble;
-                    uv.x += cos(uv.y * 20.0 + u_time * 2.5) * 0.002 * u_wobble;
+                    uv.x += sin(uv.y * 10.0 + u_time) * 0.002 * u_wobble;
+                    uv.x += cos(uv.y * 30.0 + u_time * 2.0) * 0.001 * u_wobble;
                 }
 
-                // Vertical Jitter
-                float vJitter = 0.0;
-                if (rand(vec2(u_time, u_time)) > 0.98) {
-                    vJitter = (rand(vec2(u_time, 1.0)) - 0.5) * 0.05 * u_distortion;
+                // H-Sync Jitter (High freq noise)
+                float jitter = (rand(vec2(u_time, uv.y)) - 0.5) * 0.005 * u_distortion;
+                // Add "Combing" effect (Interlacing simulation) on movement
+                // We fake it by jittering odd/even lines differently
+                if (mod(gl_FragCoord.y, 2.0) < 1.0) {
+                    jitter *= 1.5; 
                 }
-                uv.y += vJitter;
+                uv.x += jitter;
 
-                // Horizontal Jitter (Tearing)
-                float hShake = (rand(vec2(u_time, uv.y)) - 0.5) * 0.005 * u_distortion;
-                hShake += sin(uv.y * 100.0 + u_time * 20.0) * 0.002 * u_distortion;
-                
-                // Head Switching (Bottom Tearing)
+                // Head Switching (Bottom tearing)
                 if (uv.y < 0.05) {
-                    float distortionStr = (0.05 - uv.y) * 20.0; 
-                    hShake += sin(uv.y * 50.0 + u_time * 30.0) * 0.05 * distortionStr * u_distortion;
-                    hShake += (rand(vec2(uv.y, u_time)) - 0.5) * 0.1 * distortionStr * u_distortion;
+                    float distStr = (0.05 - uv.y) * 20.0;
+                    uv.x += sin(uv.y * 100.0 + u_time * 20.0) * 0.05 * distStr * u_distortion;
                 }
-                
-                uv.x += hShake;
 
-                // 2. Base Color (Video or Blue Screen)
+                // --- 2. COLOR & SIGNAL PROCESSING ---
+                
                 vec3 color;
                 
                 if (u_blueScreen == 1) {
-                    // Classic VCR Blue
-                    color = vec3(0.0, 0.0, 0.8); 
+                    color = vec3(0.0, 0.0, 0.8);
+                    // Add static on blue screen
+                    color += (rand(uv + u_time) - 0.5) * 0.2;
                 } else {
-                    // Video Sampling with NTSC Chroma Bleed
-                    vec3 yiqCenter = rgb2yiq(texture2D(u_image, uv).rgb);
-                    float bleed = u_rgbShift * 0.002;
-                    vec3 yiqLeft = rgb2yiq(texture2D(u_image, uv - vec2(bleed, 0.0)).rgb);
-                    vec3 yiqRight = rgb2yiq(texture2D(u_image, uv + vec2(bleed, 0.0)).rgb);
+                    // Sample Center
+                    vec3 rgb = texture2D(u_image, uv).rgb;
+                    vec3 yiq = rgb2yiq(rgb);
                     
-                    vec3 finalYIQ;
-                    finalYIQ.x = yiqCenter.x; 
-                    float chromaBlurAmt = 0.4;
-                    finalYIQ.y = mix(yiqCenter.y, (yiqLeft.y + yiqRight.y) * 0.5, chromaBlurAmt) * 1.2; 
-                    finalYIQ.z = mix(yiqCenter.z, (yiqLeft.z + yiqRight.z) * 0.5, chromaBlurAmt) * 1.2; 
+                    // A. CHROMA SUBSAMPLING (The "VHS Look")
+                    // VHS color bandwidth is terrible (~0.4 MHz). We simulate this by heavily blurring I and Q channels horizontally.
+                    float blurWidth = u_rgbShift * 0.004; 
                     
+                    vec3 yiqL = rgb2yiq(texture2D(u_image, uv + vec2(-blurWidth, 0.0)).rgb);
+                    vec3 yiqR = rgb2yiq(texture2D(u_image, uv + vec2(blurWidth, 0.0)).rgb);
+                    vec3 yiqL2 = rgb2yiq(texture2D(u_image, uv + vec2(-blurWidth * 2.5, 0.0)).rgb);
+                    vec3 yiqR2 = rgb2yiq(texture2D(u_image, uv + vec2(blurWidth * 2.5, 0.0)).rgb);
+
+                    // Average Chroma (I, Q) but KEEP Luma (Y) sharp
+                    float i_blur = (yiqL.y + yiqR.y + yiqL2.y + yiqR2.y + yiq.y) / 5.0;
+                    float q_blur = (yiqL.z + yiqR.z + yiqL2.z + yiqR2.z + yiq.z) / 5.0;
+                    
+                    // Reassemble
+                    vec3 finalYIQ = vec3(yiq.x, i_blur, q_blur);
+                    
+                    // B. LUMA SHARPENING (Edge Ringing/Peaking)
+                    // VCRs artificially boost sharpness, causing white halos around black lines.
+                    if (u_sharpen > 0.0) {
+                        float lumaLeft = rgb2yiq(texture2D(u_image, uv + vec2(-0.002, 0.0)).rgb).x;
+                        float lumaRight = rgb2yiq(texture2D(u_image, uv + vec2(0.002, 0.0)).rgb).x;
+                        // High pass = Center - Average
+                        float highPass = finalYIQ.x - (lumaLeft + lumaRight) * 0.5;
+                        // Add back to sharpen
+                        finalYIQ.x += highPass * u_sharpen * 3.0; 
+                    }
+
                     color = yiq2rgb(finalYIQ);
                 }
 
-                // 3. Text Overlay (OSD)
-                // Text jitter same as video for glued-on look
+                // --- 3. ARTIFACTS & OVERLAYS ---
+
+                // Text Overlay (Jitter with video)
                 vec4 texColor = texture2D(u_text, uv);
                 color = mix(color, texColor.rgb, texColor.a);
 
-                // 4. Artifacts (Applied to everything)
-                // Scanlines
-                float scanline = sin(uv.y * 600.0 + u_time * 10.0); 
-                color -= u_scanline * 0.1 * (0.5 + 0.5 * scanline);
+                // Scanlines (Moving slightly)
+                float scanline = sin(uv.y * u_resolution.y * 0.5 + u_time * 5.0);
+                color -= 0.05 * u_scanline * (1.0 + scanline);
 
-                // Noise
-                float staticNoise = rand(uv + vec2(u_time, u_time));
-                color += (staticNoise - 0.5) * u_noise * 0.5;
-
-                // Dropouts
-                if (rand(vec2(uv.y, u_time * 0.1)) > 0.995 && u_noise > 0.1) {
-                    float streak = rand(vec2(uv.x, u_time));
-                    color += vec3(streak) * u_noise * 2.0;
+                // Noise (Grain) - Luminance noise
+                float n = rand(uv + vec2(u_time * 10.0, u_time));
+                color += (n - 0.5) * u_noise * 0.4;
+                
+                // Dropouts (White streaks)
+                if (u_noise > 0.2 && rand(vec2(uv.y, u_time)) > 0.99) {
+                     float streak = rand(vec2(uv.x * 0.1, u_time)); // stretched noise
+                     if (streak > 0.5) color += vec3(0.6);
                 }
 
-                // Hum Bars
+                // Hum Bars (60Hz ground loop)
                 if (u_hum > 0.0) {
-                    float humWave = sin(uv.y * 2.0 + u_time * 5.0);
-                    color += humWave * 0.1 * u_hum;
+                    float hum = sin(uv.y * 4.0 + u_time * 8.0);
+                    // AC beat causes geometric distortion too
+                    // already handled in UV, here just add darkness bar
+                    color -= hum * 0.1 * u_hum;
+                    // And a slight magenta tint
+                    color.g -= hum * 0.05 * u_hum;
                 }
 
-                // Vignette & Brightness
+                // Vignette
                 float dist = distance(uv, vec2(0.5, 0.5));
                 color *= smoothstep(0.8, 0.8 - (u_vignette * 0.6), dist * (0.5 + u_vignette));
-                color *= u_brightness;
 
                 gl_FragColor = vec4(color, 1.0);
             }
         `;
 
-        // === Application State ===
         const canvas = document.getElementById('gl-canvas');
         const gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
         const video = document.getElementById('source-video');
         const placeholder = document.getElementById('upload-placeholder');
         const statusMsg = document.getElementById('status-msg');
         
+        // Defaults tuned for realism
         const params = {
-            noise: 0.25,
-            scanline: 0.4,
-            rgbShift: 3.5,
-            distortion: 0.3,
-            wobble: 0.1,
-            hum: 0.1,
-            vignette: 0.5,
-            brightness: 1.1
+            noise: 0.3,
+            scanline: 0.5,
+            rgbShift: 4.5, // High chroma blur for VHS feel
+            distortion: 0.2,
+            wobble: 0.05,
+            hum: 0.15,
+            vignette: 0.4,
+            sharpen: 0.5, // New default
+            brightness: 1.0
         };
 
-        // VCR State
         let vcrState = {
-            status: "STOP", // STOP, PLAY, PAUSE, FF, REW
-            startTime: Date.now(),
+            status: "STOP",
             osdVisible: true,
-            blueScreen: true,
-            playbackRate: 1.0
+            blueScreen: true
         };
 
         const textParams = {
@@ -450,7 +445,6 @@
         let textCanvas, textCtx;
         let animationFrameId;
 
-        // === Initialization ===
         function initWebGL() {
             if (!gl) return;
 
@@ -496,10 +490,7 @@
             const shader = gl.createShader(type);
             gl.shaderSource(shader, source);
             gl.compileShader(shader);
-            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                gl.deleteShader(shader);
-                return null;
-            }
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) return null;
             return shader;
         }
 
@@ -511,7 +502,6 @@
             return program;
         }
 
-        // === VCR OSD Logic ===
         function formatTime(seconds) {
             const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
             const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
@@ -537,52 +527,49 @@
             textCtx.font = `40px "ThinRounded", "VT323", monospace`;
             textCtx.fillStyle = "#ffffff";
             textCtx.textBaseline = 'top';
-            
-            // Text Shadow (Black Outline for OSD)
             textCtx.shadowColor = "black";
             textCtx.shadowBlur = 0;
-            textCtx.lineWidth = 3;
+            textCtx.lineWidth = 4;
             textCtx.strokeStyle = "black";
+            
+            // Smoother scaling for text
+            const scale = canvas.width / 640; 
+            const fontSize = Math.max(20, 40 * scale);
+            textCtx.font = `${fontSize}px "ThinRounded", "VT323", monospace`;
 
-            // 1. Draw VCR OSD (if enabled)
             if (vcrState.osdVisible) {
-                const padding = 40;
-                
-                // Top Left: Status
+                const padding = 40 * scale;
                 const statusText = getVCRStatusText();
+                
+                // Status
                 textCtx.strokeText(statusText, padding, padding);
                 textCtx.fillText(statusText, padding, padding);
 
-                // Top Right: Mode
+                // Mode
                 const modeText = "SP";
                 const modeWidth = textCtx.measureText(modeText).width;
                 textCtx.strokeText(modeText, textCanvas.width - padding - modeWidth, padding);
                 textCtx.fillText(modeText, textCanvas.width - padding - modeWidth, padding);
 
-                // Bottom Left: Date/Time (Fake)
+                // Date
                 const now = new Date();
-                const dateStr = `AM 12:00`; // Classic VCR stuck time or dynamic
-                // Let's use real time for fun
                 const realTime = now.toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute:'2-digit'});
-                textCtx.strokeText(realTime, padding, textCanvas.height - padding - 40);
-                textCtx.fillText(realTime, padding, textCanvas.height - padding - 40);
+                textCtx.strokeText(realTime, padding, textCanvas.height - padding - fontSize);
+                textCtx.fillText(realTime, padding, textCanvas.height - padding - fontSize);
 
-                // Bottom Right: Counter
-                let counterTime = 0;
-                if (!video.paused) counterTime = video.currentTime;
+                // Counter
+                let counterTime = !video.paused ? video.currentTime : 0;
                 const timeStr = formatTime(counterTime);
                 const timeWidth = textCtx.measureText(timeStr).width;
-                textCtx.strokeText(timeStr, textCanvas.width - padding - timeWidth, textCanvas.height - padding - 40);
-                textCtx.fillText(timeStr, textCanvas.width - padding - timeWidth, textCanvas.height - padding - 40);
+                textCtx.strokeText(timeStr, textCanvas.width - padding - timeWidth, textCanvas.height - padding - fontSize);
+                textCtx.fillText(timeStr, textCanvas.width - padding - timeWidth, textCanvas.height - padding - fontSize);
             }
 
-            // 2. Draw Custom Text
             if (textParams.customContent) {
                 const x = (textParams.x / 100) * textCanvas.width;
                 const y = (textParams.y / 100) * textCanvas.height;
-                textCtx.font = `60px "ThinRounded", "VT323", monospace`;
-                
-                // Center align custom text
+                // Bigger custom text
+                textCtx.font = `${fontSize * 1.5}px "ThinRounded", "VT323", monospace`;
                 const metrics = textCtx.measureText(textParams.customContent);
                 textCtx.strokeText(textParams.customContent, x - metrics.width/2, y);
                 textCtx.fillText(textParams.customContent, x - metrics.width/2, y);
@@ -592,17 +579,13 @@
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textCanvas);
         }
 
-        // === Rendering Loop ===
         function resizeCanvas() {
             const container = canvas.parentElement;
             const containerW = container.clientWidth;
             const containerH = container.clientHeight;
             
-            // Default aspect if no video
             let aspect = 4/3; 
-            if (video.videoWidth) {
-                aspect = video.videoWidth / video.videoHeight;
-            }
+            if (video.videoWidth) aspect = video.videoWidth / video.videoHeight;
 
             let newW = containerW;
             let newH = containerW / aspect;
@@ -612,14 +595,14 @@
                 newW = containerH * aspect;
             }
 
-            // Set canvas resolution high enough for text
             const resX = video.videoWidth || 640;
             const resY = video.videoHeight || 480;
 
             canvas.width = resX;
             canvas.height = resY;
-            canvas.style.width = `${newW - 32}px`;
-            canvas.style.height = `${newH - 32}px`;
+            
+            canvas.style.width = `${newW - 20}px`; 
+            canvas.style.height = `${newH - 20}px`;
 
             textCanvas.width = resX;
             textCanvas.height = resY;
@@ -629,17 +612,10 @@
 
         function render(time) {
             if (!program) return;
-            
             gl.useProgram(program);
 
-            // Determine what to show
-            // If vcrState.blueScreen is true, we pass flag to shader
-            // However, if we are playing, blueScreen is false.
-            
-            // Pass textures
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, videoTexture);
-            // Only update texture if we have data
             if (video.readyState >= 2 && !vcrState.blueScreen) {
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
             }
@@ -649,7 +625,6 @@
             gl.bindTexture(gl.TEXTURE_2D, textTexture);
             gl.uniform1i(gl.getUniformLocation(program, "u_text"), 1);
 
-            // Geometry
             const positionLocation = gl.getAttribLocation(program, "a_position");
             gl.enableVertexAttribArray(positionLocation);
             gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -660,9 +635,9 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
             gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
-            // Uniforms
             gl.uniform1f(gl.getUniformLocation(program, "u_time"), time * 0.001);
             gl.uniform1i(gl.getUniformLocation(program, "u_blueScreen"), vcrState.blueScreen ? 1 : 0);
+            gl.uniform2f(gl.getUniformLocation(program, "u_resolution"), canvas.width, canvas.height);
             
             gl.uniform1f(gl.getUniformLocation(program, "u_noise"), parseFloat(params.noise));
             gl.uniform1f(gl.getUniformLocation(program, "u_scanline"), parseFloat(params.scanline));
@@ -671,25 +646,20 @@
             gl.uniform1f(gl.getUniformLocation(program, "u_wobble"), parseFloat(params.wobble));
             gl.uniform1f(gl.getUniformLocation(program, "u_hum"), parseFloat(params.hum));
             gl.uniform1f(gl.getUniformLocation(program, "u_vignette"), parseFloat(params.vignette));
+            gl.uniform1f(gl.getUniformLocation(program, "u_sharpen"), parseFloat(params.sharpen));
             gl.uniform1f(gl.getUniformLocation(program, "u_brightness"), parseFloat(params.brightness));
 
             gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
             gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-            // Update OSD continuously for time code
             updateTextCanvas();
-
             animationFrameId = requestAnimationFrame(render);
         }
 
-        // === Logic & Interactions ===
         function setVCRState(status) {
             vcrState.status = status;
-            
-            // Reset Buttons
             document.querySelectorAll('.vcr-btn').forEach(b => b.classList.remove('active'));
             
-            // Logic
             switch(status) {
                 case "PLAY":
                     video.playbackRate = 1.0;
@@ -699,7 +669,7 @@
                     break;
                 case "PAUSE":
                     video.pause();
-                    vcrState.blueScreen = false; // Pause shows still frame
+                    vcrState.blueScreen = false; 
                     document.getElementById('btn-pause').classList.add('active');
                     break;
                 case "FF":
@@ -709,43 +679,34 @@
                     document.getElementById('btn-ff').classList.add('active');
                     break;
                 case "REW":
-                    // Fake rewind: standard HTML5 video sucks at reverse playback
-                    // We will set blue screen or just play very slowly to simulate struggle?
-                    // Let's do a skip back loop
                     video.playbackRate = 1.0;
                     video.pause(); 
-                    vcrState.blueScreen = false; // Show still
+                    vcrState.blueScreen = false; 
                     document.getElementById('btn-rew').classList.add('active');
                     rewindInterval = setInterval(() => {
                         video.currentTime = Math.max(0, video.currentTime - 0.5);
                     }, 100);
-                    return; // Special case for interval
+                    return;
                 case "STOP":
                     video.pause();
                     video.currentTime = 0;
                     vcrState.blueScreen = true;
-                    // No button highlight for stop usually, or maybe all off
                     break;
             }
-
-            // Clear rewind interval if not REW
             if (typeof rewindInterval !== 'undefined') clearInterval(rewindInterval);
         }
         let rewindInterval;
 
         function setupUI() {
-            // VCR Buttons
             document.getElementById('btn-play').addEventListener('click', () => setVCRState("PLAY"));
             document.getElementById('btn-pause').addEventListener('click', () => setVCRState("PAUSE"));
             document.getElementById('btn-ff').addEventListener('click', () => setVCRState("FF"));
             document.getElementById('btn-rew').addEventListener('click', () => setVCRState("REW"));
             
-            // OSD Toggle
             document.getElementById('toggle-vcr-osd').addEventListener('change', (e) => {
                 vcrState.osdVisible = e.target.checked;
             });
 
-            // File Upload
             document.getElementById('video-input').addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
@@ -754,7 +715,6 @@
                 }
             });
 
-            // Camera
             document.getElementById('btn-camera').addEventListener('click', async () => {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -771,9 +731,12 @@
                 }
             });
 
-            // Sliders
             const bindSlider = (id, key, displayId) => {
                 const el = document.getElementById(id);
+                // Fix: Check if element exists
+                if (!el) {
+                    return;
+                }
                 const display = document.getElementById(displayId || `val-${key}`);
                 el.addEventListener('input', (e) => {
                     params[key] = e.target.value;
@@ -782,13 +745,13 @@
             };
 
             bindSlider('param-noise', 'noise');
-            bindSlider('param-scanline', 'scanline');
+            bindSlider('param-scanline', 'scanline'); 
             bindSlider('param-rgbShift', 'rgbShift');
             bindSlider('param-distortion', 'distortion');
             bindSlider('param-wobble', 'wobble');
             bindSlider('param-hum', 'hum');
+            bindSlider('param-sharpen', 'sharpen');
             
-            // Custom Text
             document.getElementById('text-input').addEventListener('input', (e) => {
                 textParams.customContent = e.target.value;
             });
@@ -813,7 +776,6 @@
             resizeCanvas();
         }
 
-        // === Export Logic (Same as before) ===
         const workerBlob = new Blob([`importScripts('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');`], { type: 'application/javascript' });
         const workerUrl = URL.createObjectURL(workerBlob);
         
@@ -825,7 +787,6 @@
             indicator.classList.remove('hidden');
             statusMsg.innerText = "GIF 녹화 중...";
 
-            // 1. Calculate GIF output size
             const gifWidth = 320;
             const gifHeight = Math.floor(gifWidth * (canvas.height / canvas.width));
 
@@ -837,8 +798,6 @@
                 workerScript: workerUrl
             });
 
-            // 2. Create Temp Canvas for Resizing
-            // gif.js crops if canvas is bigger than gif size, so we must draw to a small canvas first.
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = gifWidth;
             tempCanvas.height = gifHeight;
@@ -861,13 +820,70 @@
                     });
                     gif.render();
                 } else {
-                    // Draw full res canvas to small temp canvas
                     tempCtx.drawImage(canvas, 0, 0, gifWidth, gifHeight);
-                    // Add small frame
                     gif.addFrame(tempCanvas, {copy: true, delay: 1000/fps});
                     framesCaptured++;
                 }
             }, 1000/fps);
+        });
+        
+        let mediaRecorder;
+        let recordedChunks = [];
+        let isVideoRecording = false;
+
+        document.getElementById('btn-record-video').addEventListener('click', () => {
+            const btn = document.getElementById('btn-record-video');
+            const btnText = document.getElementById('video-btn-text');
+            const indicator = document.getElementById('recording-indicator-video');
+
+            if (!isVideoRecording) {
+                const stream = canvas.captureStream(30); 
+                let audioStream = null;
+                if (video.srcObject) {
+                    audioStream = video.srcObject;
+                } else if (video.captureStream) {
+                    audioStream = video.captureStream();
+                } else if (video.mozCaptureStream) {
+                    audioStream = video.mozCaptureStream();
+                }
+
+                if (audioStream && audioStream.getAudioTracks().length > 0) {
+                    stream.addTrack(audioStream.getAudioTracks()[0]);
+                }
+
+                try {
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+                } catch (e) {
+                    mediaRecorder = new MediaRecorder(stream);
+                }
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) recordedChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    downloadBlob(blob, 'vcr_tape.webm');
+                    recordedChunks = [];
+                    statusMsg.innerText = "비디오 저장 완료";
+                };
+
+                mediaRecorder.start();
+                isVideoRecording = true;
+                btn.classList.add('bg-red-900', 'text-white', 'border-red-500');
+                btn.classList.remove('text-red-500');
+                btnText.innerText = "■ 중지";
+                indicator.classList.remove('hidden');
+                statusMsg.innerText = "녹화 중...";
+
+            } else {
+                mediaRecorder.stop();
+                isVideoRecording = false;
+                btn.classList.remove('bg-red-900', 'text-white', 'border-red-500');
+                btn.classList.add('text-red-500');
+                btnText.innerText = "● 영상 저장";
+                indicator.classList.add('hidden');
+            }
         });
 
         function downloadBlob(blob, filename) {
@@ -879,7 +895,6 @@
             setTimeout(() => URL.revokeObjectURL(url), 100);
         }
 
-        // Start
         initWebGL();
         setupUI();
         requestAnimationFrame(render);

@@ -94,7 +94,7 @@
     <header class="bg-zinc-900 border-b border-zinc-800 p-4 flex justify-between items-center shrink-0 z-10">
         <div class="flex items-center gap-2">
             <div class="w-4 h-4 bg-blue-600 rounded-sm animate-pulse border border-blue-400"></div>
-            <h1 class="text-2xl text-pink-500 tracking-wider font-bold">RETRO VISION LAB v3.0 (VCR)</h1>
+            <h1 class="text-2xl text-pink-500 tracking-wider font-bold">RETRO VISION LAB v3.1 (VCR)</h1>
         </div>
         <div class="text-zinc-500 text-sm hidden sm:block">VHS / NTSC / VCR EMULATOR</div>
     </header>
@@ -825,13 +825,24 @@
             indicator.classList.remove('hidden');
             statusMsg.innerText = "GIF 녹화 중...";
 
+            // 1. Calculate GIF output size
+            const gifWidth = 320;
+            const gifHeight = Math.floor(gifWidth * (canvas.height / canvas.width));
+
             const gif = new GIF({
                 workers: 2,
                 quality: 10,
-                width: 320,
-                height: 320 * (canvas.height / canvas.width),
+                width: gifWidth,
+                height: gifHeight,
                 workerScript: workerUrl
             });
+
+            // 2. Create Temp Canvas for Resizing
+            // gif.js crops if canvas is bigger than gif size, so we must draw to a small canvas first.
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = gifWidth;
+            tempCanvas.height = gifHeight;
+            const tempCtx = tempCanvas.getContext('2d');
 
             const fps = 15;
             const duration = 3000;
@@ -850,7 +861,10 @@
                     });
                     gif.render();
                 } else {
-                    gif.addFrame(canvas, {copy: true, delay: 1000/fps});
+                    // Draw full res canvas to small temp canvas
+                    tempCtx.drawImage(canvas, 0, 0, gifWidth, gifHeight);
+                    // Add small frame
+                    gif.addFrame(tempCanvas, {copy: true, delay: 1000/fps});
                     framesCaptured++;
                 }
             }, 1000/fps);
